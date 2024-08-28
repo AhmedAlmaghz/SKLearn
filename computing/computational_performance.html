@@ -1,0 +1,862 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="سرعة الاستجابة أثناء التنبؤ" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://scikit-learn/stable/computing/computational_performance.html" />
+<meta property="og:site_name" content="scikit-learn" />
+<meta property="og:description" content="بالنسبة لبعض التطبيقات، يعد أداء الخوارزميات (الخاصة بالتعلم الآلي) أمرًا بالغ الأهمية، خاصة سرعة الاستجابة (الزمن اللازم لإتمام عملية التنبؤ) وسعة المعالجة (عدد التنبؤات التي يمكن إجراؤها في وحدة ..." />
+<meta property="og:image" content="https://scikit-learn/stable/computing/auto_examples/applications/images/sphx_glr_plot_prediction_latency_001.png" />
+<meta property="og:image:alt" content="atomic_prediction_latency" />
+<meta name="description" content="بالنسبة لبعض التطبيقات، يعد أداء الخوارزميات (الخاصة بالتعلم الآلي) أمرًا بالغ الأهمية، خاصة سرعة الاستجابة (الزمن اللازم لإتمام عملية التنبؤ) وسعة المعالجة (عدد التنبؤات التي يمكن إجراؤها في وحدة ..." />
+
+    <title>سرعة الاستجابة أثناء التنبؤ &#8212; scikit-learn 1.5.1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/colors.css?v=cc94ab7d" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/custom.css?v=e4cb1417" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=44dfd65d"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=97f0b27d"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="scikit-learn.org" defer="defer" src="https://views.scientific-python.org/js/script.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'computing/computational_performance';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://scikit-learn.org/dev/_static/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.5.1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = true;
+        </script>
+    <script src="../_static/scripts/dropdown.js?v=e2048168"></script>
+    <script src="../_static/scripts/version-switcher.js?v=a6dd8357"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/scikit-learn-logo-small.png" class="logo__image only-light" alt="scikit-learn homepage"/>
+    <script>document.write(`<img src="../_static/scikit-learn-logo-small.png" class="logo__image only-dark" alt="scikit-learn homepage"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../install.html">
+    Install
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    مرجع المستخدم
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://blog.scikit-learn.org/">
+    Community
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../getting_started.html">
+    بدء الاستخدام
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../whats_new.html">
+    تاريخ الإصدارات
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../glossary.html">
+    Glossary
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://scikit-learn.org/dev/developers/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../support.html">
+    الدعم
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../related_projects.html">
+    التعاون مع الأطر الأخرى وتحسينها
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../roadmap.html">
+    خارطة الطريق
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../governance.html">
+    Governance
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../about.html">
+    الحوكمة
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-learn/scikit-learn" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../install.html">
+    Install
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user_guide.html">
+    مرجع المستخدم
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/index.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://blog.scikit-learn.org/">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting_started.html">
+    بدء الاستخدام
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../whats_new.html">
+    تاريخ الإصدارات
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../glossary.html">
+    Glossary
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://scikit-learn.org/dev/developers/index.html">
+    Development
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../faq.html">
+    FAQ
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../support.html">
+    الدعم
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../related_projects.html">
+    التعاون مع الأطر الأخرى وتحسينها
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../roadmap.html">
+    خارطة الطريق
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../governance.html">
+    Governance
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../about.html">
+    الحوكمة
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-learn/scikit-learn" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">سرعة...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <p>بالنسبة لبعض التطبيقات، يعد أداء الخوارزميات (الخاصة بالتعلم الآلي) أمرًا بالغ الأهمية، خاصة سرعة الاستجابة (الزمن اللازم لإتمام عملية التنبؤ) وسعة المعالجة (عدد التنبؤات التي يمكن إجراؤها في وحدة الزمن) أثناء مرحلة التنبؤ. في حين أن سعة المعالجة أثناء التدريب قد تكون أيضًا ذات أهمية، إلا أنها غالبًا ما تكون أقل أهمية في بيئة الإنتاج، حيث يتم التدريب غالبًا خارج الخط (offline).</p>
+<p>في هذا القسم، سنستعرض أوامر الحجم التي يمكن توقعها من عدد من خوارزميات “سكيت-ليرن” في سياقات مختلفة، وسنقدم بعض النصائح والحيل للتغلب على الاختناقات المتعلقة بالأداء.</p>
+<section id="id1">
+<h1>سرعة الاستجابة أثناء التنبؤ<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>يتم قياس سرعة الاستجابة أثناء التنبؤ على أنها الزمن المنقضي اللازم لإجراء تنبؤ واحد (على سبيل المثال، بالمايكروثانية). وغالبًا ما يُنظر إلى سرعة الاستجابة على أنها توزيع، ويركز مهندسو العمليات غالبًا على سرعة الاستجابة عند نسبة مئوية معينة من هذا التوزيع (على سبيل المثال، المئين 90).</p>
+</section>
+<section id="id2">
+<h1>سعة المعالجة أثناء التنبؤ<a class="headerlink" href="#id2" title="Link to this heading">#</a></h1>
+<p>تُعرَّف سعة المعالجة أثناء التنبؤ على أنها عدد التنبؤات التي يمكن للبرنامج تقديمها في وحدة زمنية معينة (على سبيل المثال، عدد التنبؤات في الثانية).</p>
+<p>من الجوانب المهمة لتحسين الأداء أيضًا أنه يمكن أن يؤثر سلبًا على دقة التنبؤ. في الواقع، غالبًا ما تكون النماذج البسيطة (على سبيل المثال، الخطية بدلاً من غير الخطية، أو ذات عدد أقل من المعلمات) أسرع في التنفيذ، ولكنها ليست دائمًا قادرة على مراعاة نفس الخصائص الدقيقة للبيانات مثل النماذج الأكثر تعقيدًا.</p>
+<section id="id3">
+<h2>عوامل مؤثرة على سرعة الاستجابة أثناء التنبؤ<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+<p>أحد أكثر المخاوف المباشرة التي قد تواجهها عند استخدام/اختيار مجموعة أدوات تعلم الآلة هي سرعة الاستجابة التي يمكن بها إجراء التنبؤات في بيئة الإنتاج.</p>
+<p>العوامل الرئيسية التي تؤثر على سرعة الاستجابة أثناء التنبؤ هي:</p>
+<ol class="arabic simple">
+<li><p>عدد الخصائص (features): كلما زاد عدد الخصائص، زاد الوقت اللازم لإجراء عملية التنبؤ.</p></li>
+<li><p>تمثيل البيانات ومدى ندرتها (sparsity): يمكن لتمثيل البيانات ومدى ندرتها أن يؤثرا بشكل كبير على سرعة الاستجابة. على سبيل المثال، إذا كانت البيانات نادرة (أي تحتوي على العديد من القيم الصفرية)، فيمكن استخدام هياكل بيانات متخصصة لتخزينها بكفاءة، مما يحسن سرعة الاستجابة.</p></li>
+<li><p>تعقيد النموذج: النماذج الأكثر تعقيدًا، مثل نماذج الغابات العشوائية أو الشبكات العصبية العميقة، قد تستغرق وقتًا أطول في إجراء التنبؤات مقارنة بالنماذج البسيطة، مثل نماذج الانحدار الخطي.</p></li>
+<li><p>استخراج الخصائص: قد تكون عملية استخراج الخصائص من البيانات الأولية (مثل تحويل نص إلى ناقلات كلمات) مكلفة من حيث الوقت، خاصة إذا كانت البيانات كبيرة.</p></li>
+</ol>
+<p>هناك أيضًا عامل رئيسي آخر وهو إمكانية إجراء التنبؤات بشكل مجمع (bulk) أو بشكل منفرد (one-at-a-time). بشكل عام، فإن إجراء التنبؤات بشكل مجمع (أي إجراء العديد من التنبؤات في نفس الوقت) أكثر كفاءة لعدد من الأسباب (مثل قابلية التفرع، وذاكرة التخزين المؤقت للمعالج، وتحسينات مكتبات الجبر الخطي، وما إلى ذلك).</p>
+<p>في المثال التالي، يمكننا رؤية أن إجراء التنبؤات بشكل مجمع يكون دائمًا أسرع، وبفارق يصل إلى مرتبة أو مرتبتين من حيث الحجم، وذلك في حالة وجود عدد قليل من الخصائص:</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_prediction_latency.html"><img alt="atomic_prediction_latency" src="../_images/sphx_glr_plot_prediction_latency_001.png" style="width: 800.0px; height: 480.0px;" /></a></strong></p><p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_prediction_latency.html"><img alt="bulk_prediction_latency" src="../_images/sphx_glr_plot_prediction_latency_002.png" style="width: 800.0px; height: 480.0px;" /></a></strong></p><p>لقياس أداء خوارزميات مختلفة في حالتك الخاصة، يمكنك ببساطة تغيير معلمة “n_features” في هذا المثال: <a class="reference internal" href="../auto_examples/applications/plot_prediction_latency.html#sphx-glr-auto-examples-applications-plot-prediction-latency-py"><span class="std std-ref">Prediction Latency</span></a>. يجب أن يعطيك هذا تقديرًا لحجم سرعة الاستجابة أثناء التنبؤ.</p>
+</section>
+<section id="id4">
+<h2>تكوين “سكيت-ليرن” لتقليل التحميل الزائد للتحقق من الصحة<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<p>يقوم “سكيت-ليرن” ببعض التحقق من صحة البيانات التي تزيد من التحميل الزائد لكل استدعاء لوظيفة “predict” والوظائف المماثلة. على وجه الخصوص، يتضمن التحقق من أن الخصائص محدودة (ليست NaN أو لا نهائية) تمريرًا كاملاً عبر البيانات. إذا كنت تتأكد من أن بياناتك مقبولة، فيمكنك إلغاء التحقق من المحدودية عن طريق تعيين متغير البيئة “SKLEARN_ASSUME_FINITE” إلى سلسلة غير فارغة قبل استيراد “سكيت-ليرن”، أو تكوينه في بايثون باستخدام الدالة: <code class="xref py py-func docutils literal notranslate"><span class="pre">set_config</span></code>.</p>
+<p>لمزيد من التحكم أكثر من هذه الإعدادات العالمية، يسمح السياق التكويني (config context) بتعيين هذا التكوين ضمن سياق محدد:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">config_context</span><span class="p">(</span><span class="n">assume_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">pass</span>  <span class="c1"># قم بالتعلم/التنبؤ هنا مع تقليل التحقق من الصحة</span>
+</pre></div>
+</div>
+<p>لاحظ أن هذا سيؤثر على جميع استخدامات <code class="xref py py-func docutils literal notranslate"><span class="pre">assert_all_finite</span></code> داخل السياق.</p>
+</section>
+<section id="id5">
+<h2>تأثير عدد الخصائص<a class="headerlink" href="#id5" title="Link to this heading">#</a></h2>
+<p>من الواضح أنه عندما يزيد عدد الخصائص، تزداد أيضًا كمية الذاكرة التي تستهلكها كل عينة. في الواقع، بالنسبة لمصفوفة مكونة من M عينة و N خاصية، تكون التعقيد المكاني (space complexity) هو O(NM).</p>
+<p>من منظور الحساب، يعني هذا أيضًا أن عدد العمليات الأساسية (مثل الضربات لمنتجات المصفوفة-المتجه في النماذج الخطية) يزيد أيضًا. في الرسم البياني التالي، يمكننا رؤية تطور سرعة الاستجابة أثناء التنبؤ مع زيادة عدد الخصائص:</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_prediction_latency.html"><img alt="influence_of_n_features_on_latency" src="../_images/sphx_glr_plot_prediction_latency_003.png" style="width: 800.0px; height: 480.0px;" /></a></strong></p><p>بشكل عام، يمكنك توقع زيادة وقت التنبؤ بشكل خطي على الأقل مع زيادة عدد الخصائص (قد تحدث حالات غير خطية اعتمادًا على البصمة الذاكرية الإجمالية والخوارزمية).</p>
+</section>
+<section id="id6">
+<h2>تأثير تمثيل البيانات المدخلة<a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<p>يوفر “سايكوب” (SciPy) هياكل بيانات المصفوفة النادرة (sparse matrix) والتي تم تحسينها لتخزين البيانات النادرة. الميزة الرئيسية لتنسيقات البيانات النادرة هي أنك لا تخزن الأصفار، لذلك إذا كانت بياناتك نادرة، فستستخدم ذاكرة أقل بكثير. لن تأخذ القيمة غير الصفرية في تمثيل نادرة (‘CSR’ أو ‘CSC’) في المتوسط سوى موضع 32 بت صحيح واحد + قيمة النقطة العائمة 64 بت + 32 بت إضافية لكل صف أو عمود في المصفوفة.</p>
+<p>يؤدي استخدام المدخلات النادرة في نموذج خطي (أو نادر) إلى تسريع التنبؤ بشكل كبير، حيث تؤثر فقط القيم غير الصفرية على الضرب النقطي وبالتالي على تنبؤات النموذج. لذلك، إذا كان لديك 100 قيمة غير صفرية في مساحة أبعادها 1e6، فأنت بحاجة فقط إلى 100 عملية ضرب وجمع بدلاً من 1e6.</p>
+<p>ومع ذلك، قد تستفيد الحسابات على التمثيل الكثيف (dense representation) من عمليات المتجهات المُحسّنة بشكل كبير وتعدد الخيوط في “BLAS”، وتميل إلى إعطاء عدد أقل من حالات الإخفاق في ذاكرة التخزين المؤقت للمعالج. لذلك، يجب أن تكون النسبة المئوية للقيم غير الصفرية منخفضة جدًا (10٪ كحد أقصى، اعتمادًا على الأجهزة) ليكون تمثيل الإدخال النادر أسرع من تمثيل الإدخال الكثيف على آلة بها العديد من وحدات المعالجة المركزية (CPUs) وتنفيذ “BLAS” المحسّن.</p>
+<p>فيما يلي كود بايثون لاختبار ندرة مدخلاتك:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sparsity_ratio</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;نسبة الندرة في الإدخال:&quot;</span><span class="p">,</span> <span class="n">sparsity_ratio</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>كقاعدة عامة، يمكنك اعتبار أنه إذا كانت نسبة الندرة أكبر من 90٪، فيمكنك الاستفادة من التنسيقات النادرة. راجع وثائق تنسيقات المصفوفة النادرة في “سايكوب” للحصول على مزيد من المعلومات حول كيفية بناء (أو تحويل بياناتك إلى) تنسيقات المصفوفة النادرة. في معظم الأحيان، تعمل تنسيقات “CSR” و “CSC” بشكل أفضل.</p>
+</section>
+<section id="id7">
+<h2>تأثير تعقيد النموذج<a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<p>بشكل عام، عندما يزيد تعقيد النموذج، من المفترض أن تزداد قوة التنبؤ وسرعة الاستجابة. عادة ما يكون زيادة قوة التنبؤ أمرًا مثيرًا للاهتمام، ولكن بالنسبة للعديد من التطبيقات، من الأفضل ألا نزيد كثيرًا من سرعة الاستجابة أثناء التنبؤ. سنستعرض الآن هذه الفكرة لعائلات مختلفة من النماذج المُشرفة.</p>
+<p>بالنسبة لـ <a class="reference internal" href="../api/sklearn.linear_model.html#module-sklearn.linear_model" title="sklearn.linear_model"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sklearn.linear_model</span></code></a> (على سبيل المثال، “Lasso”، و “ElasticNet”، و “SGDClassifier/Regressor”، و “Ridge” و “RidgeClassifier”، و “PassiveAggressiveClassifier/Regressor”، و “LinearSVC”، و “LogisticRegression”، وما إلى ذلك)، فإن دالة القرار المطبقة أثناء التنبؤ هي نفسها (ضرب نقطي)، لذلك يجب أن تكون سرعة الاستجابة مكافئة.</p>
+<p>فيما يلي مثال باستخدام <code class="xref py py-class docutils literal notranslate"><span class="pre">SGDClassifier</span></code> مع عقوبة “elasticnet”. يتم التحكم في قوة العقوبة بشكل عام بواسطة معلمة “alpha”. باستخدام “alpha” عالية بما يكفي، يمكنك بعد ذلك زيادة معلمة “l1_ratio” لعقوبة “elasticnet” لفرض مستويات مختلفة من الندرة في معاملات النموذج. تُفسر الندرة العالية هنا على أنها تعقيد أقل للنموذج حيث نحتاج إلى عدد أقل من المعاملات لوصفها بالكامل. بالطبع، تؤثر الندرة بدورها على وقت التنبؤ حيث يستغرق الضرب النقطي النادر وقتًا يتناسب تقريبًا مع عدد المعاملات غير الصفرية.</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_model_complexity_influence.html"><img alt="en_model_complexity" src="../_images/sphx_glr_plot_model_complexity_influence_001.png" style="width: 512.0px; height: 384.0px;" /></a></strong></p><p>بالنسبة لعائلة <a class="reference internal" href="../api/sklearn.svm.html#module-sklearn.svm" title="sklearn.svm"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sklearn.svm</span></code></a> من الخوارزميات مع نواة غير خطية، ترتبط سرعة الاستجابة بعدد متجهات الدعم (support vectors) (كلما قل العدد، زادت السرعة). يجب أن تنمو سرعة الاستجابة وسعة المعالجة (بشكل أساسي) بشكل خطي مع عدد متجهات الدعم في نموذج “SVC” أو “SVR”. ستؤثر النواة أيضًا على سرعة الاستجابة حيث يتم استخدامها لحساب إسقاط متجه الإدخال مرة واحدة لكل متجه دعم. في الرسم البياني التالي، تم استخدام معلمة “nu” من <code class="xref py py-class docutils literal notranslate"><span class="pre">NuSVR</span></code> للتأثير على عدد متجهات الدعم.</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_model_complexity_influence.html"><img alt="nusvr_model_complexity" src="../_images/sphx_glr_plot_model_complexity_influence_002.png" style="width: 512.0px; height: 384.0px;" /></a></strong></p><p>بالنسبة لـ <a class="reference internal" href="../api/sklearn.ensemble.html#module-sklearn.ensemble" title="sklearn.ensemble"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sklearn.ensemble</span></code></a> من الأشجار (مثل “RandomForest”، و “GBT”، و “ExtraTrees”، وما إلى ذلك)، يلعب عدد الأشجار وعمقها أهم دور. يجب أن تتناسب سرعة الاستجابة وسعة المعالجة بشكل خطي مع عدد الأشجار. في هذه الحالة، تم استخدام معلمة “n_estimators” من <code class="xref py py-class docutils literal notranslate"><span class="pre">GradientBoostingRegressor</span></code> مباشرة.</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_model_complexity_influence.html"><img alt="gbt_model_complexity" src="../_images/sphx_glr_plot_model_complexity_influence_003.png" style="width: 512.0px; height: 384.0px;" /></a></strong></p><p>في أي حال، يجب أن تكون على علم بأن تقليل تعقيد النموذج يمكن أن يؤثر سلبًا على الدقة، كما ذُكر سابقًا. على سبيل المثال، يمكن التعامل مع مشكلة غير قابلة للفصل الخطي باستخدام نموذج خطي سريع، ولكن من المحتمل أن تتأثر قوة التنبؤ في هذه العملية.</p>
+</section>
+<section id="id8">
+<h2>سرعة استجابة استخراج الخصائص<a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<p>معظم نماذج “سكيت-ليرن” سريعة جدًا لأنها مُنفذة إما باستخدام امتدادات “Cython” المترجمة أو مكتبات الحوسبة المُحسّنة. من ناحية أخرى، في العديد من تطبيقات العالم الحقيقي، تحكم عملية استخراج الخصائص (أي تحويل البيانات الأولية، مثل صفوف قواعد البيانات أو رزم البيانات الشبكية، إلى مصفوفات “نمبر”) وقت التنبؤ الإجمالي. على سبيل المثال، في مهمة تصنيف نص “رويترز”، تستغرق عملية الإعداد بأكملها (قراءة وتهيئة ملفات “SGML”، وتجزئة النص، وهاشه إلى مساحة متجه مشتركة) من 100 إلى 500 ضعف الوقت الذي تستغرقه كود التنبؤ الفعلي، وهذا يتوقف على النموذج المُختار.</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_out_of_core_classification.html"><img alt="prediction_time" src="../_images/sphx_glr_plot_out_of_core_classification_004.png" style="width: 512.0px; height: 384.0px;" /></a></strong></p><p>لذلك، يوصى في العديد من الحالات بقياس وتوصيف كود استخراج الخصائص الخاص بك بعناية، حيث قد يكون هذا مكانًا جيدًا للبدء في التحسين عندما تكون سرعة الاستجابة الإجمالية بطيئة جدًا لتطبيقك.</p>
+</section>
+</section>
+<section id="id9">
+<h1>سعة المعالجة أثناء التنبؤ<a class="headerlink" href="#id9" title="Link to this heading">#</a></h1>
+<p>مقياس آخر مهم يجب مراعاته عند تحديد حجم أنظمة الإنتاج هو سعة المعالجة، أي عدد التنبؤات التي يمكنك إجراؤها في وحدة زمنية معينة. فيما يلي مقياس للأداء من المثال: <a class="reference internal" href="../auto_examples/applications/plot_prediction_latency.html#sphx-glr-auto-examples-applications-plot-prediction-latency-py"><span class="std std-ref">Prediction Latency</span></a> الذي يقيس هذه الكمية لعدد من الخوارزميات على بيانات اصطناعية:</p>
+<p class="centered">
+<strong><a class="reference external" href="../auto_examples/applications/plot_prediction_latency.html"><img alt="throughput_benchmark" src="../_images/sphx_glr_plot_prediction_latency_004.png" style="width: 800.0px; height: 480.0px;" /></a></strong></p><p>تم تحقيق هذه السعات على عملية واحدة. إحدى الطرق الواضحة لزيادة سعة المعالجة لتطبيقك هي إنشاء مثيلات إضافية (عادةً ما تكون عمليات في بايثون بسبب “GIL”) تشارك نفس النموذج. قد يقوم المرء أيضًا بإضافة آلات لنشر الحمل. ومع ذلك، فإن الشرح المفصل لكيفية تحقيق ذلك يتجاوز نطاق هذه الوثيقة.</p>
+<section id="id10">
+<h2>نصائح وحيل<a class="headerlink" href="#id10" title="Link to this heading">#</a></h2>
+<p>يمكن أن يساعد استخدام أجهزة رسومات أفضل (GPU) في تسريع بعض الخوارزميات، خاصة تلك التي تنطوي على عمليات مصفوفة كثيفة، مثل بعض خوارزميات التعلم العميق. يمكن لمكتبات مثل “CuPy” و “TensorFlow” و “PyTorch” الاستفادة من أجهزة “GPU” لأداء الحسابات بشكل أسرع.</p>
+<p>يمكن أن يس
+مكتبات الجبر الخطي
+……………………………..</p>
+<p>نظرًا لأن scikit-learn يعتمد بشكل كبير على Numpy/Scipy والجبر الخطي بشكل عام، فمن المنطقي الاهتمام بشكل صريح بإصدارات هذه المكتبات. بشكل أساسي، يجب التأكد من أن Numpy تم بناؤه باستخدام مكتبة BLAS محسّنة &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms</a>&gt; / LAPACK &lt;<a class="reference external" href="https://en.wikipedia.org/wiki/LAPACK">https://en.wikipedia.org/wiki/LAPACK</a>&gt;.</p>
+<p>لا تستفيد جميع النماذج من تنفيذات BLAS وLapack المحسّنة. على سبيل المثال، لا تعتمد النماذج المستندة إلى (randomized) decision trees عادةً على استدعاءات BLAS في حلقاتها الداخلية، وكذلك الأمر بالنسبة لنواة SVMs (SVC وSVR وNuSVC وNuSVR). من ناحية أخرى، فإن النموذج الخطي المنفذ باستخدام استدعاء BLAS DGEMM (عبر numpy.dot) سيستفيد عادةً بشكل كبير من تنفيذ BLAS المحسّن، مما يؤدي إلى تسريع كبير في الأداء مقارنة بـ BLAS غير المحسّن.</p>
+<p>يمكنك عرض تنفيذ BLAS / LAPACK الذي تستخدمه تثبيتات NumPy / SciPy / scikit-learn باستخدام الأمر التالي:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import sklearn; sklearn.show_versions()&quot;</span>
+</pre></div>
+</div>
+<p>تشمل تنفيذات BLAS / LAPACK المحسّنة ما يلي:</p>
+<ul class="simple">
+<li><p>أطلس (يحتاج إلى ضبط محدد للأجهزة عن طريق إعادة البناء على الجهاز المستهدف)</p></li>
+<li><p>OpenBLAS</p></li>
+<li><p>MKL</p></li>
+<li><p>Apple Accelerate وvecLib frameworks (لنظام التشغيل OSX فقط)</p></li>
+</ul>
+<p>يمكن العثور على مزيد من المعلومات في صفحة تثبيت NumPy &lt;<a class="reference external" href="https://numpy.org/install/">https://numpy.org/install/</a>&gt; وصفحة المدونة هذه &lt;<a class="reference external" href="https://danielnouri.org/notes/2012/12/19/libblas-and-liblapack-issues-and-speed,-with-scipy-and-ubuntu/">https://danielnouri.org/notes/2012/12/19/libblas-and-liblapack-issues-and-speed,-with-scipy-and-ubuntu/</a>&gt; من Daniel Nouri والتي تحتوي على تعليمات تثبيت مفصلة لنظامي Debian / Ubuntu.</p>
+</section>
+<section id="id11">
+<h2>تحديد الذاكرة العاملة<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<p>عند تنفيذ بعض الحسابات باستخدام عمليات Numpy المتجهة القياسية، يتم استخدام كمية كبيرة من ذاكرة النظام المؤقتة. قد يؤدي هذا إلى استنفاد ذاكرة النظام. حيثما يمكن إجراء الحسابات في قطع ذاكرة ثابتة، نحاول القيام بذلك، والسماح للمستخدم بالإشارة إلى الحد الأقصى لحجم ذاكرة العمل هذه (الافتراضي إلى 1 جيجابايت) باستخدام: func: set_config أو: func: config_context. يقترح ما يلي تحديد ذاكرة العمل المؤقتة إلى 128 ميغا بايت:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sklearn</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">config_context</span><span class="p">(</span><span class="n">working_memory</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">pass</span> <span class="c1"># قم بالعمل المجزأ هنا</span>
+</pre></div>
+</div>
+<p>مثال على عملية مجزأة تلتزم بهذا الإعداد هو: func: ~ metrics.pairwise_distances_chunked، والذي يسهل حساب التخفيضات الصفوف لمصفوفة المسافة الزوجية.</p>
+</section>
+<section id="id12">
+<h2>ضغط النموذج<a class="headerlink" href="#id12" title="Link to this heading">#</a></h2>
+<p>في scikit-learn، لا يتعلق ضغط النموذج إلا بالنماذج الخطية في الوقت الحالي. في هذا السياق، يعني ذلك أننا نريد التحكم في ندرة النموذج (أي عدد الإحداثيات غير الصفرية في متجهات النموذج). من الجيد عمومًا الجمع بين ندرة النموذج وتمثيل البيانات النادرة.</p>
+<p>هنا عينة من التعليمات البرمجية التي توضح استخدام طريقة “sparsify()”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">SGDRegressor</span><span class="p">(</span><span class="n">penalty</span><span class="o">=</span><span class="s1">&#39;elasticnet&#39;</span><span class="p">,</span> <span class="n">l1_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">sparsify</span><span class="p">()</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>في هذا المثال، نفضل عقوبة “elasticnet” لأنها غالبًا ما تكون حلًا وسطًا جيدًا بين دقة النموذج وسرعته. يمكن أيضًا ضبط معلمة “l1_ratio” بشكل أكبر (بالاشتراك مع قوة التنظيم “alpha”) للتحكم في هذا التوازن.</p>
+<p>تؤدي “مقارنة قياسية” &lt;<a class="github reference external" href="https://github.com/scikit-learn/scikit-learn/blob/main/benchmarks/bench_sparsify.py">scikit-learn/scikit-learn</a>&gt; على بيانات صناعية إلى انخفاض في زمن الوصول بنسبة تزيد عن 30% عندما يكون كل من النموذج والمدخلات نادرة (بنسبة 0.000024 و0.027400 من نسب المعاملات غير الصفرية على التوالي). قد تختلف النتائج حسب ندرة وحجم بياناتك ونموذجك. علاوة على ذلك، يمكن أن يكون الضغط مفيدًا جدًا لتقليل استخدام الذاكرة في النماذج التنبؤية المنشورة على خوادم الإنتاج.</p>
+</section>
+<section id="id13">
+<h2>إعادة تشكيل النموذج<a class="headerlink" href="#id13" title="Link to this heading">#</a></h2>
+<p>تتكون إعادة تشكيل النموذج من اختيار جزء فقط من الميزات المتاحة لتناسب النموذج. وبعبارة أخرى، إذا تخلى النموذج عن الميزات أثناء مرحلة التعلم، فيمكننا بعد ذلك إزالة تلك الميزات من الإدخال. هذا له فوائد عدة. أولاً، يقلل من النفقات العامة للذاكرة (وبالتالي الوقت) للنموذج نفسه. كما يسمح بإزالة مكونات اختيار الميزات الصريحة في خط الأنابيب بمجرد معرفة الميزات التي يجب الاحتفاظ بها من تشغيل سابق. وأخيرًا، يمكنه المساعدة في تقليل وقت المعالجة واستخدام وحدة الإدخال والإخراج في طبقات الوصول إلى البيانات واستخراج الميزات عن طريق عدم جمع وبناء الميزات التي يتخلص منها النموذج. على سبيل المثال، إذا كانت البيانات الخام تأتي من قاعدة بيانات، فقد يكون من الممكن كتابة استعلامات أبسط وأسرع أو تقليل استخدام وحدة الإدخال والإخراج عن طريق جعل الاستعلامات تعيد سجلات أخف.
+في الوقت الحالي، يجب إجراء إعادة التشكيل يدويًا في scikit-learn. في حالة الإدخال النادر (خاصة بتنسيق “CSR”)، يكون من الكافي عمومًا عدم إنشاء الميزات ذات الصلة، وترك أعمدتها فارغة.</p>
+</section>
+<section id="id14">
+<h2>الروابط<a class="headerlink" href="#id14" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>: ref: &lt;performance-howto&gt; توثيق أداء مطور scikit-learn</p></li>
+<li><p>تنسيقات مصفوفة scipy النادرة &lt;<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/sparse.html">https://docs.scipy.org/doc/scipy/reference/sparse.html</a>&gt;</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  <div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item">
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+                </footer>
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">سرعة الاستجابة أثناء التنبؤ</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">سعة المعالجة أثناء التنبؤ</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">عوامل مؤثرة على سرعة الاستجابة أثناء التنبؤ</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">تكوين “سكيت-ليرن” لتقليل التحميل الزائد للتحقق من الصحة</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">تأثير عدد الخصائص</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">تأثير تمثيل البيانات المدخلة</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">تأثير تعقيد النموذج</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">سرعة استجابة استخراج الخصائص</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">سعة المعالجة أثناء التنبؤ</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">نصائح وحيل</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">تحديد الذاكرة العاملة</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">ضغط النموذج</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">إعادة تشكيل النموذج</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">الروابط</a></li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/computing/computational_performance.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2007 - 2024, scikit-learn developers (BSD License).
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>
